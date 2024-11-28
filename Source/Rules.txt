@@ -1,0 +1,13 @@
+<expr> = <term><add><expr>.
+<arg> = <num> | <braced>.
+<term> = <fact><mul><term>.
+<fact> = [<arg>]<func><arg> | <func><arg><arg>.
+<num> = [<sgn>]<N>[<pt><N>][<E>[<sgn>]<N>] | [<sgn>]$PI$.
+<sgn> = "+" | "-".
+<N> = <dig>{<dig>}.
+<dig> = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9".
+<pt> = "." | ",".
+<mul> = $MUL$ | $DIV$.
+<add> = $ADD$ | $SUB$.
+<func> = $POW$ | $SIN$ | $COS$ | $ARCSIN$ | $ARCCOS$ | $LOG$ | $LN$.
+<braced> = '('<expr>')' | '{'<expr>'}' | '('<expr>')'.
