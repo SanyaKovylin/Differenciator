@@ -1,0 +1,1 @@
+5.134*arcsin(x) / x^2 + \sin(x) * (\cos (ln 4))^5

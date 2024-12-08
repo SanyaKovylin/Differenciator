@@ -44,8 +44,7 @@ run:
 	$(Build)/$(Exe)
 
 clean:
-	rd -rf $(Build)
-
+	rd /s /q $(Build)/
 
 test:
 	cls

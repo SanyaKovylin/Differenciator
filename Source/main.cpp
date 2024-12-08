@@ -3,19 +3,22 @@
 
 #include "expr_tree.h"
 // #include "akakiy.h"
+#include "ebnf.h"
+#include "lexsint.h"
 
 int main(void){
     e_tree TTT = {};
     TreeCtor(&TTT, NULL, "MY TREE");
 
-    ParseExpressionFromFile(&TTT, "input.txt");
+    FParseInf("expr.txt", &TTT);
+    // ParseExpressionFromFile(&TTT, "input.txt");
     PrintTree(&TTT);
-    printf("passed\n");
+    // printf("passed\n");
     TTT.curr_node = &TTT.head;
-    printptr(&TTT);
+    // printptr(&TTT);
     ETreeSimplifier(&TTT);
-    printptr(&TTT);
-    printf("simp\n");
+    // printptr(&TTT);
+    // printf("simp\n");
 
     TTT.curr_node = &TTT.head;
     PrintTree(&TTT);
@@ -25,11 +28,18 @@ int main(void){
 
     ETreeDerivate(&TTT, &NewT);
 
-    printf("\n");
+    // printf("\n");
 
     PrintTree(&NewT);
 
     ETreeSimplifier(&NewT);
 
     PrintTree(&NewT);
+
+    // BnfRunBuild("Source/Rules.txt", "BNFParse/Source/Parser.cpp", "Include/operators.h");
+
+    // LexParse("expr.txt", &n);
+    // SintParse(&TTT, n);
+//
+//     PrintTree(&TTT);
 }

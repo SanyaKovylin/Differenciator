@@ -13,6 +13,7 @@
 #define OPERATOR(name, num, ...)  name = num,
 typedef enum Operators {
     #include "operators.h"
+    COUNT_OPER,
 } e_oper;
 #undef OPERATOR
 
@@ -53,6 +54,7 @@ typedef enum ExprTreeError{
     WRONG_TYPE = 1,
     UNKNOWN_OPETOR = 2,
     FOUND_VARIABLE_IN_COMPUTE = 3,
+    CALLOC_ERR = 4,
 } e_err;
 
 
@@ -62,7 +64,7 @@ typedef enum ExprTreeError{
 
 const int MaxWordSize = 20;
 
-e_err TreeCtor(e_tree *Tree,e_node* head, const char* name);
+e_err TreeCtor(e_tree *Tree, e_node* head, const char* name);
 // e_err TreeAddNode(e_tree *Tree, void* value, size_t valsize);
 
 #define DEF_TYPE(name, num, type, ...) e_node* NewNode##name(type value, e_node *Left, e_node* Right);
@@ -89,7 +91,7 @@ bool isfunc(e_node *node);
 double compute_node(e_node *node);
 bool IsNodeEqual(e_node *node, double num);
 bool IsZeroNode(e_node *node);
-
+const int BIGINT = 100000000;
 
 e_err ETreeSimplifier(e_tree* Tree);
 int ETreeRecSimplifier(e_tree *Tree);

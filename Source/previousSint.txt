@@ -1,0 +1,139 @@
+e_err ParseExpr(e_tree *Tree, Tokens* Nodes, int from, int to, int brlvl);
+e_err ParseTerm(e_tree *Tree, Tokens* Nodes, int from, int to, int brlvl);
+e_err ParseFact(e_tree *Tree, Tokens* Nodes, int from, int to, int brlvl);
+
+
+e_err ParseTerm(e_tree *Tree, Tokens* Nodes, int from, int to, int brlvl){ //2
+    int currbrlvl = brlvl;
+    bool was_split = false;
+    // printf("Term %d  %d\n", from, to);
+    for (int i = from; i < to && !was_split; i++){
+     // printf("Node tp:%d %d %d\n",Nodes->buffer[i]->type, Nodes->buffer[i]->value.var, priority(Nodes->buffer[i]));
+        if (IS_OBRACE) currbrlvl++;
+        else if (IS_CBRACE) currbrlvl--;
+        else if (Nodes->buffer[i]->type == OPER && priority(Nodes->buffer[i]) == 2 && currbrlvl == brlvl){
+
+            e_node ** save = Tree->curr_node;
+
+            *save = Nodes->buffer[i];
+
+            Tree->curr_node = &(*save)->left;
+            ParseFact(Tree, Nodes, from, i, brlvl);
+
+            Tree->curr_node = &(*save)->right;
+            ParseTerm(Tree, Nodes,i + 1, to, brlvl);
+
+            was_split = true;
+        }
+    }
+
+    if (!was_split){
+        ParseFact(Tree, Nodes, from, to, brlvl);
+    }
+    return TREE_OK;
+}
+
+e_err ParseFact(e_tree *Tree, Tokens* Nodes, int from, int to, int brlvl){ //1 and 0
+int currbrlvl = brlvl;
+    bool was_split = false;
+
+    // printf("Fact %d  %d\n", from, to);
+
+    for (int i = from; i < to && !was_split; i++){
+
+        // printf("Node tp:%d %d %d\n",Nodes->buffer[i]->type, Nodes->buffer[i]->value.var, priority(Nodes->buffer[i]));
+        if (IS_OBRACE) currbrlvl++;
+        else if (IS_CBRACE) currbrlvl--;
+        else if (Nodes->buffer[i]->type == OPER && priority(Nodes->buffer[i]) < 2 && currbrlvl == brlvl){
+
+        e_node ** save = Tree->curr_node;
+        *save = Nodes->buffer[i];
+
+#define OPERATOR(name, number, str, nargs, ispref, isfunc, prior, diff_action, action, simplifier, alterstr)\
+    case name: \
+            if (nargs == 1){\
+    \
+                Tree->curr_node = &(*save)->right;\
+                ParseExpr(Tree, Nodes, i + 1, to, brlvl + 1);\
+                Tree->curr_node = save;\
+            }\
+            if (nargs == 2){\
+                Tree->curr_node = &(*save)->left;\
+                ParseExpr(Tree, Nodes, from, i, brlvl);\
+\
+                Tree->curr_node = &(*save)->right;\
+                ParseExpr(Tree, Nodes, i + 1, to, brlvl);\
+\
+                Tree->curr_node = save;\
+                }\
+        was_split = true;break;
+
+            switch (Nodes->buffer[i]->value.var){
+                #include "operators.h"
+
+                default: printf("Unknown operatorin SintParse");
+            }
+        }
+        else if (Nodes->buffer[i]->type == NUM && currbrlvl == brlvl){
+            *Tree->curr_node = Nodes->buffer[i];
+            was_split = true;
+            // printf("Got NUM\n");
+        }
+        else if (Nodes->buffer[i]->type == OPER && priority(Nodes->buffer[i]) == 0 && currbrlvl == brlvl){
+            *Tree->curr_node = Nodes->buffer[i];
+            was_split = true;
+            // printf("Got Const\n");
+        }
+        else if (Nodes->buffer[i]->type == VAR && !IS_OBRACE && !IS_CBRACE && currbrlvl == brlvl){
+            *Tree->curr_node = Nodes->buffer[i];
+            // printf("Got VAR\n");
+            was_split = true;
+        }
+    }
+
+    if (!was_split){
+        ParseExpr(Tree, Nodes, from + 1, to - 1, brlvl + 1);
+    }
+
+    return TREE_OK;
+}
+
+e_err ParseExpr(e_tree *Tree, Tokens* Nodes, int from, int to, int brlvl){ //3
+
+    int currbrlvl = brlvl;
+    bool was_split = false;
+
+    if (to < from) return TREE_OK;
+
+    // printf("Expr %d  %d\n", from, to);
+
+
+    for (int i = from; i < to && !was_split; i++){
+
+        // printf("Node tp:%d %d %d\n",Nodes->buffer[i]->type, Nodes->buffer[i]->value.var, priority(Nodes->buffer[i]));
+        if (IS_OBRACE) currbrlvl++;
+        else if (IS_CBRACE) currbrlvl--;
+        else if (Nodes->buffer[i]->type == OPER && priority(Nodes->buffer[i]) == 3 && currbrlvl == brlvl){
+
+            e_node ** save = Tree->curr_node;
+
+            // printf("Oper %d\n", Nodes->buffer[i]->value.var);
+
+            *save = Nodes->buffer[i];
+
+            Tree->curr_node = &(*save)->left;
+            ParseTerm(Tree, Nodes, from, i, brlvl);
+
+            Tree->curr_node = &(*save)->right;
+            ParseExpr(Tree, Nodes,i + 1, to, brlvl);
+
+            was_split = true;
+        }
+    }
+
+    if (!was_split){
+        ParseTerm(Tree, Nodes, from, to, brlvl);
+    }
+
+    return TREE_OK;
+}

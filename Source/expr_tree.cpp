@@ -205,15 +205,15 @@ e_err TreeRecParse(Buffer* src, e_tree *Tree){
 
     TreeParseGetName(src, cmd);
 
-    printf("cmd:%s\n", cmd);
-    printf("%s", &readval);
+    // printf("cmd:%s\n", cmd);
+    // printf("%s", &readval);
 
     e_node *new_node = NULL;
 
     if (isdigit(cmd[0])){
        new_node = NewNodeNUM(strtod(cmd, NULL), NULL, NULL);
        *Tree->curr_node = new_node;
-    //    printf("NUMBER");
+    //    printf("NUMBER: %g\n", strtod(cmd, NULL));
     }
     else
         #define OPERATOR(name, number, str, nargs, ispref, isfunc, ...) \
@@ -336,7 +336,7 @@ e_node* ETreeNodeCopy(e_node *node){
 
         #undef DEF_TYPE
 
-        default: printf("Unknown Type");
+        default: printf("Unknown Type: %d", node->type);
     }
 
     return new_node;
@@ -374,7 +374,7 @@ double compute_node(e_node *node){
 
     default: printf("Unknown Operator in Compute");
     }
-    printf("%g\n", z);
+
     return z;
 }
 
@@ -398,10 +398,9 @@ int ETreeRecSimplifier(e_tree *Tree){
     if (curr_node == NULL || curr_node->type != OPER) return TREE_OK;
 
     if (!isfunc(curr_node)) {
-        printf("here");
         *Tree->curr_node = NewNodeNUM(compute_node(curr_node), NULL, NULL);
         NodeRecFree(curr_node);
-        return 1;
+        return BIGINT;
 
     }
     int actions = 0;
@@ -422,9 +421,6 @@ int ETreeRecSimplifier(e_tree *Tree){
 
     default: printf("Unknown operator in simplifier");
     }
-
-    if (actions != 0) free(curr_node);
-
     return actions;
 }
 

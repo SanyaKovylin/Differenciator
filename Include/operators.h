@@ -117,10 +117,10 @@ OPERATOR(POW,    4, "^",        2, false, true , 0, {
     // int actions = 0
     //curr_node = *Tree->curr_node;
 
-    if (IsZeroNode(curr_node->left)) {*Tree->curr_node = NewNodeNUM(0, NULL, NULL); actions++;}
+    if (IsZeroNode(curr_node->left))      {*Tree->curr_node = NewNodeNUM(0, NULL, NULL); actions++;}
     if (IsNodeEqual(curr_node->right, 1)) {*Tree->curr_node = curr_node->left; actions++;}
-    if (IsNodeEqual(curr_node->left, 1)) {*Tree->curr_node = NewNodeNUM(1, NULL, NULL); actions++;}
-    if (IsZeroNode(curr_node->right)) {*Tree->curr_node = NewNodeNUM(1, NULL, NULL); actions++;}
+    if (IsNodeEqual(curr_node->left, 1))  {*Tree->curr_node = NewNodeNUM(1, NULL, NULL); actions++;}
+    if (IsZeroNode(curr_node->right))     {*Tree->curr_node = NewNodeNUM(1, NULL, NULL); actions++;}
 }, "")
 
 OPERATOR(SIN,    5, "\\sin",    1, false, true , 1, {
@@ -138,7 +138,7 @@ OPERATOR(SIN,    5, "\\sin",    1, false, true , 1, {
     //curr_node = *Tree->curr_node;
 
     if (IsZeroNode(curr_node->right)) {*Tree->curr_node = NewNodeNUM(0, NULL, NULL); actions++;}
-}, "")
+}, "sin")
 OPERATOR(COS,    6, "\\cos",    1, false, true , 1, {
     //e_node *new_node = NULL;
     // curr_node = *Tree->curr_node;
@@ -156,18 +156,18 @@ OPERATOR(COS,    6, "\\cos",    1, false, true , 1, {
     //curr_node = *Tree->curr_node;
 
     if (IsZeroNode(curr_node->right)) {*Tree->curr_node = NewNodeNUM(1, NULL, NULL); actions++;}
-}, "")
+}, "cos")
 OPERATOR(ARCSIN, 7, "\\arcsin", 1, false, true , 1, {
     //e_node *new_node = NULL;
     // curr_node = *Tree->curr_node;
     new_node = NewNodeOPER(DIV,
                     ETreeNodeDerivate(DerTree, curr_node->right),
-                    NewNodeOPER(SQRT, NULL,
+                    NewNodeOPER(POW,
                         NewNodeOPER(SUB,
                             NewNodeNUM(1, NULL, NULL),
                             NewNodeOPER(POW,
-                                ETreeNodeCopy(curr_node),
-                                NewNodeNUM(2, NULL, NULL)))));
+                                ETreeNodeCopy(curr_node->right),
+                                NewNodeNUM(2, NULL, NULL))), NewNodeNUM(0.5, NULL, NULL)));
 }, {
     // x, y are given ealier
     // get double z
@@ -177,7 +177,7 @@ OPERATOR(ARCSIN, 7, "\\arcsin", 1, false, true , 1, {
     //curr_node = *Tree->curr_node;
 
     if (IsZeroNode(curr_node->right)) {*Tree->curr_node = NewNodeNUM(0, NULL, NULL); actions++;}
-}, "")
+}, "arcsin")
 OPERATOR(ARCCOS, 8, "\\arccos", 1, false, true , 1, {
     //e_node *new_node = NULL;
     // curr_node = *Tree->curr_node;
@@ -185,12 +185,12 @@ OPERATOR(ARCCOS, 8, "\\arccos", 1, false, true , 1, {
                     NewNodeNUM(-1, NULL, NULL),
                     NewNodeOPER(DIV,
                         ETreeNodeDerivate(DerTree, curr_node->right),
-                        NewNodeOPER(SQRT, NULL,
+                        NewNodeOPER(POW,
                             NewNodeOPER(SUB,
                                 NewNodeNUM(1, NULL, NULL),
                                 NewNodeOPER(POW,
-                                    ETreeNodeCopy(curr_node),
-                                    NewNodeNUM(2, NULL, NULL))))));
+                                    ETreeNodeCopy(curr_node->right),
+                                    NewNodeNUM(2, NULL, NULL))), NewNodeNUM(0.5,NULL,NULL))));
 }, {
     // x, y are given ealier
     // get double z
@@ -200,7 +200,7 @@ OPERATOR(ARCCOS, 8, "\\arccos", 1, false, true , 1, {
     //curr_node = *Tree->curr_node;
 
     if (IsZeroNode(curr_node->right)) {*Tree->curr_node = NewNodeOPER(PI, NULL, NULL); actions++;}
-}, "")
+}, "arccos")
 OPERATOR(LOG,    9, "\\log_",   2, true , true , 1, {
     //e_node *new_node = NULL;
     // curr_node = *Tree->curr_node;
@@ -218,7 +218,7 @@ OPERATOR(LOG,    9, "\\log_",   2, true , true , 1, {
     if (IsZeroNode(curr_node->left)) {printf("Base is nothing!!!\n"); actions++;}
     if (IsNodeEqual(curr_node->right, 1)) {*Tree->curr_node = NewNodeNUM(0, NULL, NULL); actions++;}
 
-}, "")
+}, "log")
 
 OPERATOR(LN,    10, "\\ln",     1, false, true , 1, {
     //e_node *new_node = NULL;
@@ -231,7 +231,7 @@ OPERATOR(LN,    10, "\\ln",     1, false, true , 1, {
     //curr_node = *Tree->curr_node;
 
     if (IsZeroNode(curr_node->right)) {*Tree->curr_node = NewNodeNUM(0, NULL, NULL); actions++;}
-}, "")
+}, "ln")
 
 OPERATOR(E,    11, "\\e",     0, false, false , 0, {
     //e_node *new_node = NULL;
@@ -244,7 +244,7 @@ OPERATOR(E,    11, "\\e",     0, false, false , 0, {
 }, {
     // int actions = 0
     //curr_node = *Tree->curr_node;
-}, "")
+}, "e")
 
 OPERATOR(PI,    12, "\\pi",     0, false, false , 0, {
     //e_node *new_node = NULL;
@@ -258,7 +258,7 @@ OPERATOR(PI,    12, "\\pi",     0, false, false , 0, {
     // int actions = 0
     //curr_node = *Tree->curr_node;
 
-}, "")
+}, "pi")
 
 OPERATOR(SQRT,    13, "\\sqrt",     1, true, false , 0, {
     //e_node *new_node = NULL;
@@ -275,4 +275,4 @@ OPERATOR(SQRT,    13, "\\sqrt",     1, true, false , 0, {
 }, {
     // int actions = 0
     //curr_node = *Tree->curr_node;
-}, "")
+}, "sqrt")

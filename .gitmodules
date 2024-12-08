@@ -1,0 +1,3 @@
+[submodule "BNFParse"]
+	path = BNFParse
+	url = https://github.com/SanyaKovylin/BNFParse
