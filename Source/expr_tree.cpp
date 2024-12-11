@@ -7,6 +7,38 @@
 
 #include "expr_tree.h"
 
+static const char *output = NULL;
+FILE* outptr = stdout;
+e_err SetOutputFile(const char* file){
+
+    output = file;
+    outptr = fopen(file, "w");
+    PrintPreamble(outptr);
+    return TREE_OK;
+}
+
+void PrintPreamble(FILE* stream){
+
+    fputs(
+"\\input{preamble}\n"
+"\\title{Math}"
+"\\author{Sanya Kovylin}\n"
+"\\date{November 2024}\n"
+"\n"
+"\\begin{document}\n"
+"\n"
+"\\maketitle\n"
+"\n"
+"\\section{Finding the derivative}\n"
+, stream);
+
+}
+
+void PrintExit(){
+
+    fputs("\\end{document}", outptr);
+}
+
 e_err TreeCtor(e_tree *Tree, e_node *head, const char* name){
 
     assert(Tree != NULL);
@@ -47,10 +79,13 @@ e_err TreeCtor(e_tree *Tree, e_node *head, const char* name){
 e_err PrintTree(e_tree *Tree){
     printf("\n");
 
-    FILE *stream = stdout;
+    FILE *stream = outptr;
     setvbuf(stream, NULL, 0, 0);
+    // Tree->curr_node = &Tree->head;
 
+    fprintf(outptr, "\\begin{equation} \n");
     e_err ret = RecPrintTree(Tree, stream);
+    fprintf(outptr, "\n\\end{equation} \n");
 
     printf("\n");
 
@@ -92,10 +127,10 @@ e_err RecPrintTree(e_tree *Tree, FILE *stream){
 }
 
 #define PRINTLEFT(need, prior) \
-        if (need && priority(curr_node->left) > prior) fputc('(', stream);\
+        if (need && (priority(curr_node->left) > prior || (!prior && curr_node->left->type == OPER))) fputc('(', stream);\
         Tree->curr_node = &curr_node->left;\
         RecPrintTree(Tree, stream); \
-        if (need && priority(curr_node->left) > prior) fputc(')', stream);\
+        if (need && (priority(curr_node->left) > prior || (!prior && curr_node->left->type == OPER))) fputc(')', stream);\
 
 #define PRINTRIGHT(need, prior) \
         if (need && priority(curr_node->right) > prior) fputc('(', stream);\
@@ -119,8 +154,10 @@ case (name):{\
     if (ispref){\
 \
         fprintf(stream, "%s{", str);\
-        PRINTLEFT(false, prior);\
-        fputs("}{", stream);\
+        if (nargs > 1){\
+            PRINTLEFT(false, prior);\
+            fputs("}{", stream);\
+        }\
         PRINTRIGHT(false, prior);\
         fputc('}', stream);\
     }\
@@ -128,7 +165,7 @@ case (name):{\
     {\
         if (nargs == 2) {\
         \
-        PRINTLEFT(true, prior)\
+            PRINTLEFT(true, prior);\
         }\
 \
         fprintf(stream, "%s", str);\
@@ -137,6 +174,7 @@ case (name):{\
             if (isfunc) {\
                 fputc('{', stream);\
             }\
+            else fputc(' ', stream);\
             PRINTRIGHT(true, prior);\
             if (isfunc) {\
                 fputc('}', stream);\
@@ -273,6 +311,8 @@ e_err ETreeDerivate(e_tree *Tree, e_tree *DerTree){
     // assert(DerTree->head != NULL);
 
     DerTree->head = ETreeNodeDerivate(DerTree, Tree->head);
+    Tree->curr_node = &Tree->head;
+    DerTree->curr_node = &DerTree->head;
 
     return TREE_OK;
 }
@@ -312,8 +352,17 @@ e_node* ETreeNodeDerivate(e_tree *DerTree, e_node *curr_node){
         default: printf("Unknown TYPE!, %d", curr_node->type);
 
     }
+
     DerTree->curr_node = &new_node;
-    PrintTree(DerTree);
+
+    if (new_node->left && new_node->right){
+
+        fprintf(outptr, "Итак, следующий шаг: \n");
+        PrintTree(DerTree);
+        // fprintf(outptr, "\n\\end{equation} \n");
+    }
+
+    DerTree->curr_node = NULL;
 
     return new_node;
 }
@@ -342,14 +391,14 @@ e_node* ETreeNodeCopy(e_node *node){
     return new_node;
 }
 
-bool isfunc(e_node *node){
+bool is_func(e_node *node){
 
     bool was_var = false;
 
     if (node == NULL) return was_var;
     if (node->type == VAR) return true;
 
-    was_var = isfunc(node->left) || isfunc(node->right);
+    was_var = is_func(node->left) || is_func(node->right);
 
     return was_var;
 }
@@ -397,7 +446,7 @@ int ETreeRecSimplifier(e_tree *Tree){
 
     if (curr_node == NULL || curr_node->type != OPER) return TREE_OK;
 
-    if (!isfunc(curr_node)) {
+    if (!is_func(curr_node)) {
         *Tree->curr_node = NewNodeNUM(compute_node(curr_node), NULL, NULL);
         NodeRecFree(curr_node);
         return BIGINT;
@@ -431,7 +480,7 @@ bool IsZeroNode(e_node *node){
 }
 
 bool IsNodeEqual(e_node *node, double num){
-    return !isfunc(node) && IsZero(compute_node(node) - num);
+    return !is_func(node) && IsZero(compute_node(node) - num);
 }
 
 e_err NodeRecFree(e_node* node){

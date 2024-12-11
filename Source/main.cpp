@@ -11,7 +11,9 @@ int main(void){
     TreeCtor(&TTT, NULL, "MY TREE");
 
     FParseInf("expr.txt", &TTT);
+    SetOutputFile("out.tex");
     // ParseExpressionFromFile(&TTT, "input.txt");
+    printf("YEEEEE: %d\n", TTT.head->value.var);
     PrintTree(&TTT);
     // printf("passed\n");
     TTT.curr_node = &TTT.head;
@@ -30,16 +32,18 @@ int main(void){
 
     // printf("\n");
 
-    PrintTree(&NewT);
+    // PrintTree(&NewT);
 
     ETreeSimplifier(&NewT);
 
-    PrintTree(&NewT);
+    // PrintTree(&NewT);
 
     // BnfRunBuild("Source/Rules.txt", "BNFParse/Source/Parser.cpp", "Include/operators.h");
 
     // LexParse("expr.txt", &n);
     // SintParse(&TTT, n);
 //
-//     PrintTree(&TTT);
+    PrintTree(&NewT);
+
+    PrintExit();
 }

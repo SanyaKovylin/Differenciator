@@ -78,8 +78,8 @@ OPERATOR(DIV,    3, "\\frac",   2, true , true , 2, {
 OPERATOR(POW,    4, "^",        2, false, true , 0, {
     //e_node *new_node = NULL;
     // curr_node = *Tree->curr_node;
-    if (isfunc(curr_node->right)){
-        if (isfunc(curr_node->left)){
+    if (is_func(curr_node->right)){
+        if (is_func(curr_node->left)){
 
             new_node = NewNodeOPER(MUL,
                         ETreeNodeCopy(curr_node),
@@ -160,14 +160,23 @@ OPERATOR(COS,    6, "\\cos",    1, false, true , 1, {
 OPERATOR(ARCSIN, 7, "\\arcsin", 1, false, true , 1, {
     //e_node *new_node = NULL;
     // curr_node = *Tree->curr_node;
+    // new_node = NewNodeOPER(DIV,
+    //                 ETreeNodeDerivate(DerTree, curr_node->right),
+    //                 NewNodeOPER(POW,
+    //                     NewNodeOPER(SUB,
+    //                         NewNodeNUM(1, NULL, NULL),
+    //                         NewNodeOPER(POW,
+    //                             ETreeNodeCopy(curr_node->right),
+    //                             NewNodeNUM(2, NULL, NULL))), NewNodeNUM(0.5, NULL, NULL)));
+
     new_node = NewNodeOPER(DIV,
                     ETreeNodeDerivate(DerTree, curr_node->right),
-                    NewNodeOPER(POW,
+                    NewNodeOPER(SQRT, NULL,
                         NewNodeOPER(SUB,
                             NewNodeNUM(1, NULL, NULL),
                             NewNodeOPER(POW,
                                 ETreeNodeCopy(curr_node->right),
-                                NewNodeNUM(2, NULL, NULL))), NewNodeNUM(0.5, NULL, NULL)));
+                                NewNodeNUM(2, NULL, NULL)))));
 }, {
     // x, y are given ealier
     // get double z

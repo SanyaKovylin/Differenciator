@@ -87,7 +87,7 @@ e_node* ETreeNodeDerivate(e_tree *DerTree, e_node *curr_node);
 
 e_node* ETreeNodeCopy(e_node *node);
 
-bool isfunc(e_node *node);
+bool is_func(e_node *node);
 double compute_node(e_node *node);
 bool IsNodeEqual(e_node *node, double num);
 bool IsZeroNode(e_node *node);
@@ -99,5 +99,8 @@ int ETreeRecSimplifier(e_tree *Tree);
 e_err NodeRecFree(e_node* node);
 
 int printptr(e_tree *Tree);
+e_err SetOutputFile(const char* file);
+void PrintPreamble(FILE* stream);
+void PrintExit();
 
 #endif //EXPR_TREE_H_INCLUDED

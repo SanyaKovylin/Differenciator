@@ -197,20 +197,6 @@ e_node *GetOperator(Buffer* src){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Sintacsis =========================================================================================
 
 e_node** debugpoint = NULL;
@@ -220,7 +206,7 @@ e_err SintParse(e_tree* Tree, Tokens* Nodes){
     debugpoint = Nodes->buffer;
 
     e_node **e = NULL;
-    TryGetExpr(Tree->curr_node, Nodes->buffer, &e);
+    TryGetExpr(&Tree->head, Nodes->buffer, &e);
     Tree->curr_node = &Tree->head;
 
     return TREE_OK;
@@ -232,6 +218,8 @@ e_err SintParse(e_tree* Tree, Tokens* Nodes){
     e_node* curr_node = NULL;\
     e_node* left =  NULL;\
     e_node* right = NULL;
+
+#define AGAIN else *EndNode = StartNode;
 
 #define BUILD_NODE \
     curr_node->left = left;\
@@ -264,6 +252,7 @@ bool TryGetExpr(e_node** node, e_node** StartNode, e_node*** EndNode){
 
         return true;
     }
+    AGAIN
 
     if(TryGetTerm(node, StartNode, EndNode)) {
 
@@ -285,11 +274,13 @@ bool TryGetTerm(e_node** node, e_node** StartNode, e_node*** EndNode){
 
         return true;
     }
+    AGAIN
 
     if(TryGetFact(node, StartNode, EndNode)) {
 
         return true;
     }
+    AGAIN
 
     return false;
 }
@@ -297,7 +288,6 @@ bool TryGetTerm(e_node** node, e_node** StartNode, e_node*** EndNode){
 bool TryGetFact(e_node** node, e_node** StartNode, e_node*** EndNode){
 
     INIT_NODE;
-
     if ((TryGetPrim(&left, StartNode, EndNode) || true) &&
         TryGetFunc(&curr_node,  *EndNode, EndNode) &&
         TryGetPrim(&right,      *EndNode, EndNode)){
@@ -306,6 +296,7 @@ bool TryGetFact(e_node** node, e_node** StartNode, e_node*** EndNode){
 
         return true;
     }
+    AGAIN
 
     if (TryGetFunc(&curr_node, StartNode, EndNode) &&
         TryGetPrim(&left,       *EndNode, EndNode) &&
@@ -315,11 +306,13 @@ bool TryGetFact(e_node** node, e_node** StartNode, e_node*** EndNode){
 
         return true;
     }
+    AGAIN
 
     if (TryGetPrim(node, StartNode, EndNode)) {
 
         return true;
     }
+    AGAIN
 
     return false;
 }
@@ -330,11 +323,13 @@ bool TryGetPrim(e_node** node, e_node** StartNode, e_node*** EndNode){
 
         return true;
     }
+    AGAIN
 
     if (TryGetVar(node, StartNode, EndNode)){
 
         return true;
     }
+    AGAIN
 
     if (TryGetOBrace(StartNode, EndNode) &&
         TryGetExpr(node, *EndNode, EndNode)&&
@@ -342,6 +337,7 @@ bool TryGetPrim(e_node** node, e_node** StartNode, e_node*** EndNode){
 
         return true;
     }
+    AGAIN
 
     return false;
 }
@@ -356,8 +352,10 @@ bool TryGetAdd(e_node** node, e_node** start, e_node*** end){
     if (IS_OPER(ADD) || IS_OPER(SUB)){
 
         TRUE_CASE;
+        printf("got add\n");
         return true;
     }
+
 
     return false;
 }
